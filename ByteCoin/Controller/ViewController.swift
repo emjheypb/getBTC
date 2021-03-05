@@ -9,23 +9,24 @@
 import UIKit
 
 class ViewController: UIViewController {
-
     @IBOutlet weak var valueLbl: UILabel!
     @IBOutlet weak var currencyLbl: UILabel!
     @IBOutlet weak var currencyPckr: UIPickerView!
     
-    let coinManager = CoinManager()
+    var coinManager = CoinManager()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         currencyPckr.dataSource = self
         currencyPckr.delegate = self
+        coinManager.delegate = self
+        
+        coinManager.getCoinPrice(for: "PHP")
     }
-
-
 }
 
+//MARK: - UIPickerViewDataSource
 extension ViewController: UIPickerViewDataSource {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
         return 1
@@ -36,6 +37,7 @@ extension ViewController: UIPickerViewDataSource {
     }
 }
 
+//MARK: - UIPickerViewDelegate
 extension ViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
         return coinManager.currencyArray[row]
@@ -44,5 +46,26 @@ extension ViewController: UIPickerViewDelegate {
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         let selectedCurrency = coinManager.currencyArray[row]
         coinManager.getCoinPrice(for: selectedCurrency)
+    }
+}
+
+//MARK: - CoinManagerDelegate
+extension ViewController: CoinManagerDelegate {
+    func didFailWithError(error: Error) {
+        let alert = UIAlertController(title: "ERROR", message: "\(error)", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+        
+        DispatchQueue.main.async {
+            self.present(alert, animated: true, completion: nil)
+            self.valueLbl.text = ""
+            self.currencyLbl.text = ""
+        }
+    }
+    
+    func didSucceed(coinManager: CoinManager, response: ResponseModel) {
+        DispatchQueue.main.async {
+            self.valueLbl.text = response.rate
+            self.currencyLbl.text = response.currency
+        }
     }
 }

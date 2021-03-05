@@ -9,9 +9,17 @@
 import Foundation
 
 struct ResponseModel {
-    let rate: String
+    let time: String
+    let doubleRate: Double
+    let currency: String
     
-    init(rate: Double) {
-        self.rate = String(format: "%.2f", rate)
+    init(time: String, doubleRate: Double, currency: String) {
+        self.doubleRate = doubleRate
+        self.time = time
+        self.currency = currency
+    }
+    
+    var rate: String {
+        return String(format: "%.2f", doubleRate)
     }
 }
